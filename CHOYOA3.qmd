@@ -1,0 +1,22 @@
+---
+title: "CHOYOA3"
+format: html
+author: "Victoria Yang"
+date: "May 29, 2023"
+toc: true
+execute:
+  message: false
+  warning: false
+---
+
+link to GitHub repository:
+https://github.com/v-yc/ENVS-193DS_CHOYOA-3_Yang_Victoria
+
+```{r libraries}
+
+# read in libraries
+library(ggplot2)
+library(tibble)
+
+```
+
