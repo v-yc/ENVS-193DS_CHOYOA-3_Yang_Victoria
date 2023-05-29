@@ -12,6 +12,8 @@ execute:
 link to GitHub repository:
 https://github.com/v-yc/ENVS-193DS_CHOYOA-3_Yang_Victoria
 
+# Task 1
+
 ```{r libraries}
 
 # read in libraries
@@ -19,4 +21,34 @@ library(ggplot2)
 library(tibble)
 
 ```
+
+```{r mpg-art}
+
+# Exercise 1: make art with mpg dataset
+
+mpg |>
+  
+  # plot cty against year and use trans variable to specify colors
+  ggplot(aes(cty, year, colour = trans)) + 
+  
+  # remove legend, specify the size and transparency of the data points (bigger circles)
+  geom_point(show.legend = FALSE, size = 20, alpha = 1/20) + 
+  
+  # remove legend and change the color of the smaller circles
+  geom_point(show.legend = FALSE, colour = "#E1E8EE") + 
+  
+  # arranges data in a circular orientation
+  coord_polar() + 
+  
+  # add a theme
+  theme_void() + 
+  
+  # creates the blue gradient
+  scale_color_brewer()
+
+```
+
+
+
+
 
