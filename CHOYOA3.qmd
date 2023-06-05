@@ -9,8 +9,7 @@ execute:
   warning: false
 ---
 
-link to GitHub repository:
-https://github.com/v-yc/ENVS-193DS_CHOYOA-3_Yang_Victoria
+link to GitHub repository: https://github.com/v-yc/ENVS-193DS_CHOYOA-3_Yang_Victoria
 
 # Task 1
 
@@ -22,9 +21,9 @@ library(tibble)
 
 ```
 
-```{r mpg-art}
+Exercise 1: make art with mpg data set
 
-# Exercise 1: make art with mpg dataset
+```{r mpg-art}
 
 mpg |>
   
@@ -47,6 +46,102 @@ mpg |>
   scale_color_brewer()
 
 ```
+
+Exercise 2a: Experiment with the polar_art() function
+
+```{r polar-art}
+
+# create a function called polar_art
+polar_art <- function(seed, n, palette) {
+  
+  # set the state of the random number generator
+  set.seed(seed)
+  
+  # data frame containing random values for 
+  # aesthetics we might want to use in the art
+  dat <- tibble(
+    x0 = runif(n),
+    y0 = runif(n),
+    x1 = x0 + runif(n, min = -.2, max = .2),
+    y1 = y0 + runif(n, min = -.2, max = .2),
+    shade = runif(n), 
+    size = runif(n)
+  )
+  
+  # plot segments in various colours, using 
+  # polar coordinates and a gradient palette
+  dat |> 
+    ggplot(aes(
+      x = x0,
+      y = y0,
+      xend = x1,
+      yend = y1,
+      colour = shade,
+      size = size
+    )) +
+    geom_segment(show.legend = FALSE) +
+    coord_polar() +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0)) + 
+    scale_colour_gradientn(colours = palette) + 
+    scale_size(range = c(0, 10)) + 
+    theme_void()
+}
+
+# run the function polar_art
+polar_art(seed = 50, n = 50, palette = c("#E1E8EE", "#E1E2EE", "#FBC4C8")) # first try
+polar_art(seed = 500, n = 50, palette = c("#DFEEBD", "#FBFBF6", "#EEE1E3")) # second try
+polar_art(seed = 50, n = 500, palette = c("#C1EBD8", "#DFDFEA", "#FBFBF6")) # third try
+```
+
+Exercise 2b: Modify the polar_art() function in polar_art_02.R to make my own art!
+
+```{r}
+
+polar_art_02(seed = 50, n = 50, palette = c("#E1E8EE", "#E1E2EE", "#E7E1EE", "#EDE1EE", "#D9DBEE","#CFD1EF", "#C5C8EF", "#D6E3EE", "#CADDED", "#EAC6ED", "#E39EE9"))
+
+```
+
+Exercise 2c: Why name files with different version numbers?
+
+I think we are naming files with different version numbers instead of using version control with git because we are trying to use both functions, not just the latest version.
+
+Exercise 3a: experiment with color palettes
+
+```{r}
+# read in libraries
+library(scales)
+library(ggthemes)
+
+# sample_canva() function
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
+
+# call the function sample_canva() a few times to look at what output it produces
+show_col(sample_canva(seed=100))
+show_col(sample_canva(seed=30))
+show_col(sample_canva(seed=15))
+
+```
+
+Exercise 3b:
+
+```{r}
+
+# create a random palette generator by writing a function called sample_named_colours() that takes n as an input argument, and then returns a sample of n colors
+
+
+
+```
+
+
+
+
+
+
+
 
 
 
