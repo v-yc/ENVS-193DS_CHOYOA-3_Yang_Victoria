@@ -132,10 +132,37 @@ Exercise 3b:
 
 # create a random palette generator by writing a function called sample_named_colours() that takes n as an input argument, and then returns a sample of n colors
 
+# define function to take in n as input argument
+sample_named_colours <- function(n, seed = NULL) {
+  
+  # set random number generator
+  set.seed(seed)
+  
+  # get color palette of n colors
+  sample(colors(distinct = TRUE), n)
+  
+}
 
+# try with the polar_art function
+polar_art(seed = 50, n = 50, palette = sample_named_colours(100))
 
 ```
 
+```{r}
+
+sample_canva_02 <- function(seed = NULL) {
+
+  set.seed(seed)
+  sample(unlist(ggthemes::canva_palettes), 4)
+  
+}
+
+
+show_col(sample_canva_02())
+show_col(sample_canva(2))
+
+
+```
 
 
 
