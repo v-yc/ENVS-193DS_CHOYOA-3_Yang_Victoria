@@ -9,9 +9,11 @@ execute:
   warning: false
 ---
 
-link to GitHub repository: https://github.com/v-yc/ENVS-193DS_CHOYOA-3_Yang_Victoria
+link to GitHub repository:
 
-# Task 1
+https://github.com/v-yc/ENVS-193DS_CHOYOA-3_Yang_Victoria
+
+# Task 1: Exploring Danielle Navarro's tutorial, "Generative Art With R"
 
 ```{r libraries}
 
@@ -21,7 +23,9 @@ library(tibble)
 
 ```
 
-Exercise 1: make art with mpg data set
+## Art is Theft
+
+Exercise 1: make art with the mpg data set
 
 ```{r mpg-art}
 
@@ -47,7 +51,9 @@ mpg |>
 
 ```
 
-Exercise 2a: Experiment with the polar_art() function
+## Technique
+
+Exercise 2a: experiment with the polar_art() function
 
 ```{r polar-art}
 
@@ -94,9 +100,47 @@ polar_art(seed = 500, n = 50, palette = c("#DFEEBD", "#FBFBF6", "#EEE1E3")) # se
 polar_art(seed = 50, n = 500, palette = c("#C1EBD8", "#DFDFEA", "#FBFBF6")) # third try
 ```
 
-Exercise 2b: Modify the polar_art() function in polar_art_02.R to make my own art!
+Exercise 2b: Modify the polar_art() function to make polar_art_02 to make my own art
 
 ```{r}
+
+# This is the code for the polar_art_02 function()
+
+polar_art_02 <- function(seed, n, palette) {
+  
+  # set the state of the random number generator
+  set.seed(seed)
+  
+  # data frame containing random values for 
+  # aesthetics we might want to use in the art
+  dat <- tibble(
+    x0 = runif(n),
+    y0 = runif(n),
+    x1 = x0 + runif(n, min = -.2, max = .2),
+    y1 = y0 + runif(n, min = -.2, max = .2),
+    shade = runif(n), 
+    size = runif(n)
+  )
+  
+  # plot segments in various colours, using 
+  # polar coordinates and a gradient palette
+  dat |> 
+    ggplot(aes(
+      x = 0,
+      y = x0,
+      xend = x1+1000,
+      yend = y1,
+      colour = shade,
+      size = size
+    )) +
+    geom_segment(show.legend = FALSE) +
+    coord_polar() +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0)) + 
+    scale_colour_gradientn(colours = palette) + 
+    scale_size(range = c(0, 10)) + 
+    theme_void()
+}
 
 polar_art_02(seed = 50, n = 50, palette = c("#E1E8EE", "#E1E2EE", "#E7E1EE", "#EDE1EE", "#D9DBEE","#CFD1EF", "#C5C8EF", "#D6E3EE", "#CADDED", "#EAC6ED", "#E39EE9"))
 
@@ -105,6 +149,8 @@ polar_art_02(seed = 50, n = 50, palette = c("#E1E8EE", "#E1E2EE", "#E7E1EE", "#E
 Exercise 2c: Why name files with different version numbers?
 
 I think we are naming files with different version numbers instead of using version control with git because we are trying to use both functions, not just the latest version.
+
+## Color
 
 Exercise 3a: experiment with color palettes
 
@@ -144,33 +190,1089 @@ sample_named_colours <- function(n, seed = NULL) {
 }
 
 # try with the polar_art function
-polar_art(seed = 50, n = 50, palette = sample_named_colours(100))
+polar_art(seed = 50, n = 50, palette = sample_named_colours(2))
 
 ```
 
+Exercise 3c:
+
 ```{r}
 
-sample_canva_02 <- function(seed = NULL) {
+# new function that samples colors randomly from the canva palettes
+sample_canva_02 <- function(n, seed = NULL) {
 
   set.seed(seed)
   sample(unlist(ggthemes::canva_palettes), 4)
   
 }
 
+# this should show different colors every time you run the function
+show_col(sample_canva_02(2))
 
-show_col(sample_canva_02())
+# this should show the same colors every time you run the function
 show_col(sample_canva(2))
 
 
 ```
 
+## Composition
 
+Exercise 4a: Exploring new functions with more customization freedom
 
+-   New functions:
 
+```{r}
 
+# read in package
+library(dplyr)
 
+# sample_canva() function generates random palettes
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
 
+# sample_data() function generates random data
+sample_data <- function(seed = NULL, n = 100){
+  if(!is.null(seed)) set.seed(seed)
+  dat <- tibble(
+    x0 = runif(n),
+    y0 = runif(n),
+    x1 = x0 + runif(n, min = -.2, max = .2),
+    y1 = y0 + runif(n, min = -.2, max = .2),
+    shade = runif(n), 
+    size = runif(n),
+    shape = factor(sample(0:22, size = n, replace = TRUE))
+  )
+}
 
+# polar_styled_plot() function creates the plot and it is customizable with different geom options
+polar_styled_plot <- function(data = NULL, palette) {
+  ggplot(
+    data = data,
+    mapping = aes(
+      x = x0,
+      y = y0,
+      xend = x1,
+      yend = y1,
+      colour = shade,
+      size = size
+    )) + 
+    coord_polar(clip = "off") +
+    scale_y_continuous(
+      expand = c(0, 0),
+      limits = c(0, 1), 
+      oob = scales::oob_keep
+    ) +
+    scale_x_continuous(
+      expand = c(0, 0), 
+      limits = c(0, 1), 
+      oob = scales::oob_keep
+    ) + 
+    scale_colour_gradientn(colours = palette) + 
+    scale_size(range = c(0, 10)) + 
+    theme_void() + 
+    guides(
+      colour = guide_none(),
+      size = guide_none(),
+      fill = guide_none(),
+      shape = guide_none()
+    )
+}
 
+```
 
+-   Try creating art with the new functions!
 
+```{r}
+# try creating art using these 3 functions!
+pal <- sample_canva(seed = 23) # generate palette
+dat <- sample_data(n = 40, seed = 50) # generate random data
+
+# generate different plots
+polar_styled_plot(data = dat, palette = pal) + geom_path()
+polar_styled_plot(data = dat, palette = pal) + geom_step()
+polar_styled_plot(data = dat, palette = pal) + geom_count()
+
+# try again with another palette and data set!
+pal_02 <- sample_canva(seed = 99) # generate palette
+dat_02 <- sample_data(n = 1000, seed = 123) |> # generate random data
+  mutate(y1 = y0)
+polar_styled_plot(data = dat_02, palette = pal_02) + # generate plot
+  geom_segment()
+```
+
+Exercise 4b: Create my own function called my_styled_plot() that is similar to polar_styled_plot() in that there is freedom for creativity
+
+```{r}
+
+# create new function my_styled_plot()
+my_styled_plot <- function(data = NULL, palette) {
+  ggplot(data = data,
+    mapping = aes(
+      x = x0,
+      y = y0,
+      xend = x1,
+      yend = y1,
+      colour = shade,
+      size = size
+    )) + 
+    
+    # plot data on cartesian coordinates
+    coord_cartesian(clip = "on") +
+    scale_colour_gradientn(colours = palette) + 
+    scale_size(range = c(0, 10)) + 
+    
+    # suppress axis and axis titles
+    theme_void() + 
+    
+    # suppress legends
+    guides(
+      colour = guide_none(),
+      size = guide_none(),
+      fill = guide_none(),
+      shape = guide_none()
+    )
+}
+
+# try making art with the new function
+pal <- sample_canva(seed = 25) # generate palette
+dat <- sample_data(n = 100, seed = 50) # generate random data
+my_styled_plot(dat, pal) + geom_segment() # generate plot
+my_styled_plot(dat, pal) + geom_point() # generate plot
+my_styled_plot(dat, pal) + geom_line() # generate plot
+```
+
+# Task 2: Spatial Noise Tricks
+
+```{r}
+# read in packages
+library(dplyr)
+library(purrr)
+library(tibble)
+library(ggplot2)
+library(ggthemes)
+library(ambient)
+```
+
+## Exercise 1
+
+```{r}
+
+# sample_canva function generates palette
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
+
+# generates data
+x_coords <- seq(from = 0, to = 1, length.out = 500)
+y_coords <- seq(from = 0, to = 1, length.out = 500)
+canvas <- long_grid(x = x_coords, y = y_coords) 
+
+freq_spatial <- 10
+seed_spatial <- 10
+seed_palette <- 10
+
+dat <- canvas |> 
+  mutate(
+    paint = gen_worley(
+      x = x, 
+      y = y, 
+      frequency = freq_spatial, 
+      seed = seed_spatial
+    )
+  )
+  
+# generates art
+pic <- dat |>
+  ggplot(aes(x, y, fill = paint)) + 
+  geom_raster(show.legend = FALSE) +
+  theme_void() + 
+  coord_equal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_gradientn(
+    colours = sample_canva(seed_palette)
+  )
+
+plot(pic)
+```
+
+## Exercise 2
+
+```{r}
+
+# read in package
+library(here)
+
+# generates palette
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
+
+# make_noise_art() function
+make_noise_art <- function(
+    generator = gen_perlin, 
+    frequency = 10, 
+    seed = 1234,
+    pixels = 2000,
+    palette = c("#e5ddc8", "#01949a", "#004369", "#db1f48"), 
+    ...
+) {
+  
+  # define the grid
+  canvas <- long_grid(
+    x = seq(from = 0, to = 1, length.out = pixels),
+    y = seq(from = 0, to = 1, length.out = pixels)
+  ) 
+  
+  # use the generator to add paint
+  canvas <- canvas |>
+    mutate(
+      paint = generator(
+        x, y, 
+        frequency = frequency, 
+        seed = seed, 
+        ...
+      )
+    )
+  
+  # use ggplot2 to draw the picture
+  art <- canvas |> 
+    ggplot(aes(x, y, fill = paint)) + 
+    geom_raster(show.legend = FALSE) +
+    theme_void() +
+    coord_equal() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_gradientn(colours = palette)
+  
+  return(art)
+}
+
+# call make_noise_art with idiosyncratic parameters
+art1 <- make_noise_art(
+  generator = gen_worley,
+  seed = 1000, 
+  palette = sample_canva(100),
+  value = "distance",
+  pixels = 1000
+)
+
+# save the plot to file with a generic file name
+ggsave(
+  filename = here("output", "noise-art1.png"), 
+  plot = art1,
+  width = 1000,
+  height = 1000,
+  units = "px",
+  dpi = 300
+)
+
+# make art2
+art2 <- make_noise_art(
+  generator = gen_perlin,
+  seed = 1001,
+  frequency = 50,
+  palette = sample_canva(101),
+  value = "distance",
+  pixels = 2000
+)
+
+# save art2
+ggsave(
+  filename = here("output", "noise-art2.png"), 
+  plot = art2,
+  width = 1000,
+  height = 1000,
+  units = "px",
+  dpi = 300
+)
+
+# make art3
+art3 <- make_noise_art(
+  generator = gen_waves,
+  seed = 1002, 
+  frequency = 100,
+  palette = sample_canva(102),
+  value = "distance",
+  pixels = 1000
+)
+
+# save the plot to file with a generic file name
+ggsave(
+  filename = here("output", "noise-art3.png"), 
+  plot = art3,
+  width = 1000,
+  height = 1000,
+  units = "px",
+  dpi = 300
+)
+
+```
+
+## Exercise 3
+
+```{r}
+
+# make new function that will allow user to have filenames that include info on inputs used to create the art
+make_noise_art_02 <- function(
+    generator = gen_perlin, 
+    frequency = 10, 
+    seed = 1234,
+    pixels = 2000,
+    palette = c("#e5ddc8", "#01949a", "#004369", "#db1f48"),
+    save = FALSE,
+    ...
+) {
+  # define the grid
+  canvas <- long_grid(
+    x = seq(from = 0, to = 1, length.out = pixels),
+    y = seq(from = 0, to = 1, length.out = pixels)
+  ) 
+  
+  # use the generator to add paint
+  canvas <- canvas |>
+    mutate(
+      paint = generator(
+        x, y, 
+        frequency = frequency, 
+        seed = seed, 
+        ...
+      )
+    )
+  
+  # use ggplot2 to draw the picture
+  art <- canvas |> 
+    ggplot(aes(x, y, fill = paint)) + 
+    geom_raster(show.legend = FALSE) +
+    theme_void() +
+    coord_equal() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_gradientn(colours = palette)
+  
+  palette_string = paste(palette, collapse='')
+  
+  # make new name that includes inputs used
+  fname = paste("frequency:", frequency, "_",
+                   "seed:", seed, "_",
+                   "pixels:", pixels, "_",
+                   "palette", palette_string,
+                   "_noise-art.png", sep='')
+  
+  # add a save parameter that lets users choose if they want to save the plot
+  if(save == TRUE){
+      ggsave(
+        filename = here("output", fname), 
+        plot = art,
+        width = 1000,
+        height = 1000,
+        units = "px",
+        dpi = 300
+      )
+  }
+  
+  return(art)
+}
+
+# make art and save it
+art <- make_noise_art_02(
+  generator = gen_perlin,
+  seed = 1000, 
+  palette = sample_canva(100),
+  value = "distance",
+  pixels = 1000,
+  save = TRUE
+)
+```
+
+## Exercise 4
+
+```{r}
+
+# read in packages
+library(dplyr)
+library(purrr)
+library(tibble)
+library(ggplot2)
+library(ggthemes)
+library(ambient)
+library(here)
+
+# sample_canva function generates palette
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
+
+# define grid
+blank_canvas <- long_grid(
+  x = seq(from = 0, to = 1, length.out = 2000),
+  y = seq(from = 0, to = 1, length.out = 2000)
+) 
+
+#plot_painted_canvas function
+plot_painted_canvas <- function(canvas, palette = NULL) {
+  if(is.null(palette)) {
+    palette <- c("#e5ddc8","#01949a","#004369","#db1f48")
+  }
+  canvas |> 
+    ggplot(aes(x, y, fill = paint)) + 
+    geom_raster(show.legend = FALSE) +
+    theme_void() +
+    coord_equal() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_gradientn(colours = palette)
+}
+
+# customize blank_canvas to make my own art
+blank_canvas |>
+  mutate(
+    lf_noise = gen_perlin(x, y, frequency = 10),
+    mf_noise = gen_spheres(x, y, frequency = 20),
+    hf_noise = gen_spheres(x, y, frequency = 80),
+    gate = gen_worley(x, y, frequency = 10) |> normalise(),
+    paint = lf_noise +
+      (1 + mf_noise) * (gate < .2 | gate > .8) +
+      (1 + hf_noise) * (gate >= .5 & gate <= .8)
+  ) |>
+  plot_painted_canvas(palette = sample_canva(seed = 6))
+
+```
+
+## Exercise 5
+
+```{r}
+
+# load packages
+library(dplyr)
+library(purrr)
+library(tibble)
+library(ggplot2)
+library(ggthemes)
+library(ambient)
+library(here)
+
+# generate palette
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
+
+# define grid
+blank_canvas <- long_grid(
+  x = seq(from = 0, to = 1, length.out = 2000),
+  y = seq(from = 0, to = 1, length.out = 2000)
+) 
+
+# make and plot canvas
+plot_painted_canvas <- function(canvas, palette = NULL) {
+  if(is.null(palette)) {
+    palette <- c("#e5ddc8","#01949a","#004369","#db1f48")
+  }
+  canvas |> 
+    ggplot(aes(x, y, fill = paint)) + 
+    geom_raster(show.legend = FALSE) +
+    theme_void() +
+    coord_equal() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_gradientn(colours = palette)
+}
+
+# function to make fractal art
+fractal_art <- function(fractal, generator, palette = NULL, ...) {
+  blank_canvas |>
+    mutate(
+      paint = fracture(
+        noise = generator,
+        fractal = fractal,
+        x = x, 
+        y = y, 
+        ...
+      )
+    ) |>
+    plot_painted_canvas(palette = palette)
+}
+
+# make art
+art1 <- fractal_art(fbm, gen_simplex, seed = 20, octaves = 20, palette = sample_canva(50))
+art1
+```
+
+## Exercise 6
+
+```{r}
+art2<- fractal_art(fbm, gen_worley, seed = 3, octaves = 10, palette = sample_canva(20))
+art2
+```
+
+## Exercise 7
+
+```{r}
+# each successive iteration raises previous gain to power of 0.9
+gf2 = function(x){
+  x ^ 0.95
+}
+
+# each successive iteration increase freqency by 1.5
+freqfunc2 = function(x){
+  x * 1.5
+}
+
+# make art
+art<- fractal_art(billow, gen_worley, seed = 3, octaves = 5, palette = sample_canva(22), gain = gf2, frequency = freqfunc2)
+art
+```
+
+## Exercise 8
+
+```{r}
+
+# make my own generator function
+gen_custom <- function(x, y, frequency, ...){
+  p1 <- gen_perlin(x, y, frequency = frequency, ...)
+  p2 <- gen_simplex(x, y, frequency = frequency * 5, ...)
+  p3 <- gen_cubic(x, y, frequency = frequency * 20, ...)
+  gate <- gen_simplex(x, y, frequency = frequency * 10, ...)
+  gate <- normalise(gate)
+  paint <- p1 +
+    (p2 + 3) * (gate >= .2 & gate < .8) + 
+    (p3 + 2) * (gate >= .1)
+  
+  return(paint)
+}
+
+# make art
+art <- fractal_art(billow, gen_custom, seed = 223, octaves = 20, palette = sample_canva(2))
+art
+```
+
+## Exercise 9
+
+```{r}
+# curl-art-1.R is faster (0.229s)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(ggplot2)
+library(ggthemes)
+library(ambient)
+library(here)
+library(tictoc)
+
+curl_data <- function(
+    data, 
+    iterations = 50,
+    step_size = .001,
+    ...
+) {
+  
+  update <- function(current_state, iteration, ...) {
+    curl <- curl_noise(
+      x = current_state$x, 
+      y = current_state$y,
+      generator = fracture,
+      ...
+    )
+    next_state <- current_state |>
+      mutate(
+        x = x + curl$x * step_size,
+        y = y + curl$y * step_size,
+        time = time + 1
+      )
+    return(next_state)
+  }
+  
+  data |> 
+    mutate(id = row_number(), time = 1) |>
+    accumulate(1:iterations, update, .init = _, ...) |>
+    bind_rows()
+}
+
+curl_art <- function(...) {
+  curl_data(...) |> 
+    ggplot(aes(x, y, group = id)) + 
+    geom_path() +
+    theme_void() + 
+    coord_equal() 
+}
+
+smol_grid <- long_grid(x = 1:20, y = 1:20)
+
+pic <- smol_grid |>
+  mutate(x = normalise(x), y = normalise(y)) |>
+  curl_art(noise = gen_simplex, fractal = fbm, octaves = 4, freq_init = .5)
+
+tic()
+ggsave(
+  filename = here("output", "curl-art-1.png"), 
+  plot = pic,
+  width = 2000,
+  height = 2000,
+  units = "px",
+  dpi = 300,
+  bg = "white"
+)
+toc()
+```
+
+```{r}
+# curl-art-2.R is slower (1.36s)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(ggplot2)
+library(ggthemes)
+library(ambient)
+library(here)
+library(tictoc)
+
+curl_data <- function(
+    data, 
+    iterations = 50,
+    step_size = .001,
+    ...
+) {
+  
+  update <- function(current_state, iteration, ...) {
+    curl <- curl_noise(
+      x = current_state$x, 
+      y = current_state$y,
+      generator = fracture,
+      ...
+    )
+    next_state <- current_state |>
+      mutate(
+        x = x + curl$x * step_size,
+        y = y + curl$y * step_size,
+        time = time + 1
+      )
+    return(next_state)
+  }
+  
+  data |> 
+    mutate(id = row_number(), time = 1) |>
+    accumulate(1:iterations, update, .init = _, ...) |>
+    bind_rows()
+}
+
+curl_art <- function(...) {
+  curl_data(...) |> 
+    ggplot(aes(x, y, group = id)) + 
+    geom_path() +
+    theme_void() + 
+    coord_equal() 
+}
+
+custom_curl_data <- function(data) {
+  curl_data(
+    data = data,
+    iterations = 80, 
+    octaves = 10,
+    fractal = ridged,
+    noise = gen_cubic,
+    freq_init = 1,
+    frequency = ~ . * 1.2,
+    gain_init = 1,
+    gain = ~ . * .9,
+    seed = 1
+  )
+}
+
+circle <- function(n = 100) {
+  tibble(
+    theta = 2 * pi * (1:n) / n, 
+    x = cos(theta),
+    y = sin(theta)
+  )
+}
+
+dat1 <- circle(5000) |> 
+  custom_curl_data()
+
+dat2 <- circle(5000) |>
+  mutate(x = x * .99, y = y * .99) |>
+  custom_curl_data()
+
+pic <- ggplot(mapping = aes(x, y, group = time)) +
+  geom_polygon(data = dat1, fill = "#ffffff10") +
+  geom_polygon(data = dat2, fill = "#22222205") +
+  theme_void() +
+  coord_equal()
+
+tic()
+ggsave(
+  filename = here("output", "curl-art-2.png"), 
+  plot = pic,
+  width = 2000,
+  height = 2000,
+  units = "px",
+  dpi = 300,
+  bg = "white"
+)
+toc()
+```
+
+## Exercise 10
+
+```{r}
+
+# make smoother
+smoother_pic <- smol_grid |>
+  mutate(x = normalise(x), y = normalise(y)) |>
+  curl_art(noise = gen_simplex, fractal = ridged, octaves = 1, freq_init = 0.5)
+
+tic()
+
+# save art
+ggsave(
+  filename = here("output", "curl-art-1-smoother.png"), 
+  plot = smoother_pic,
+  width = 2000,
+  height = 2000,
+  units = "px",
+  dpi = 300,
+  bg = "white"
+)
+toc()
+```
+
+# Task 3: Tiles and **Tesselations**
+
+## Rectangle Subdivision
+
+```{r}
+# load packages
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggforce)
+library(deldir)
+library(ggthemes)
+library(tictoc)
+library(ambient)
+library(purrr)
+library(tidyr)
+library(stringr)
+library(sf)
+```
+
+```{r}
+
+# generate palette
+sample_canva2 <- function(seed = NULL, n = 4) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]] |>
+    (\(x) colorRampPalette(x)(n))()  
+}
+
+# randomly selects a row in the blocks dataframe and gives the row number of the selected rectangle
+choose_rectangle <- function(blocks) {
+  sample(nrow(blocks), 1, prob = blocks$area)
+}
+
+# returns the value specifying where break is inserted into the rectangle
+choose_break <- function(lower, upper) {
+  round((upper - lower) * runif(1))
+}
+
+# create multiple rectangles
+create_rectangles <- function(left, right, bottom, top, value) {
+  tibble(
+    left = left,
+    right = right,
+    bottom = bottom,
+    top = top,
+    width = right - left,
+    height = top - bottom,
+    area = width * height,
+    value = value
+  )
+}
+
+# split rectangle horizontally
+split_rectangle_x <- function(rectangle, new_value) {
+  with(rectangle, {
+    split <- choose_break(left, right)
+    new_left  <- c(left, left + split)
+    new_right <- c(left + split, right)
+    new_value <- c(value, new_value)
+    create_rectangles(new_left, new_right, bottom, top, new_value)
+  })
+}
+
+# split rectangle vertically
+split_rectangle_y <- function(rectangle, new_value) {
+  with(rectangle, {
+    split <- choose_break(bottom, top)
+    new_bottom <- c(bottom, bottom + split)
+    new_top <- c(bottom + split, top)
+    new_value <- c(value, new_value)
+    create_rectangles(left, right, new_bottom, new_top, new_value)
+  })
+}
+
+# randomly decides to split rectangle vertically or horizontally
+split_rectangle <- function(rectangle, value) {
+  if(runif(1) < .5) {
+    return(split_rectangle_x(rectangle, value))
+  }
+  split_rectangle_y(rectangle, value)
+}
+
+# gives an updated block of rectangles
+split_block <- function(blocks, value) {
+  # selects a rectangle to be subdivided
+  old <- choose_rectangle(blocks) 
+  # splits rectangle
+  new <- split_rectangle(blocks[old, ], value)
+  bind_rows(blocks[-old, ], new)
+}
+
+# make lots of splits of the rectangles
+subdivision <- function(ncol = 1000, 
+                        nrow = 1000, 
+                        nsplits = 50, 
+                        seed = NULL) {
+  
+  if(!is.null(seed)) set.seed(seed)
+  blocks <- create_rectangles(
+    left = 1, 
+    right = ncol, 
+    bottom = 1, 
+    top = nrow, 
+    value = 0
+  )
+  reduce(1:nsplits, split_block, .init = blocks)
+}
+
+# make art
+develop <- function(div, seed = NULL) {
+  
+  div |> 
+    ggplot(aes(
+      xmin = left, 
+      xmax = right, 
+      ymin = bottom, 
+      ymax = top,
+      fill = value
+    )) +
+    geom_rect(
+      colour = "#ffffff", 
+      size = 3,
+      show.legend = FALSE
+    ) +
+    scale_fill_gradientn(
+      colours = sample_canva2(seed)
+    ) +
+    coord_equal() +
+    theme_void()
+}
+
+# experiment with nsplits and seed parameters
+pic1 <- subdivision(nsplits = 300, seed = 100) |> develop() 
+plot(pic1)
+
+pic2 <- subdivision(nsplits = 100, seed = 500) |> develop() 
+plot(pic2)
+
+pic3 <- subdivision(nsplits = 50, seed = 1000) |> develop() 
+plot(pic3)
+```
+
+## Mosaica
+
+```{r}
+
+sample_canva2 <- function(seed = NULL, n = 4) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]] |>
+    (\(x) colorRampPalette(x)(n))()  
+}
+
+choose_rectangle <- function(blocks) {
+  sample(nrow(blocks), 1, prob = blocks$area)
+}
+
+choose_break <- function(lower, upper) {
+  round((upper - lower) * runif(1))
+}
+
+create_rectangles <- function(left, right, bottom, top, value) {
+  tibble(
+    left = left,
+    right = right,
+    bottom = bottom,
+    top = top,
+    width = right - left,
+    height = top - bottom,
+    area = width * height,
+    value = value
+  )
+}
+
+split_rectangle_x <- function(rectangle, new_value) {
+  with(rectangle, {
+    split <- choose_break(left, right)
+    new_left  <- c(left, left + split)
+    new_right <- c(left + split, right)
+    new_value <- c(value, new_value)
+    create_rectangles(new_left, new_right, bottom, top, new_value)
+  })
+}
+
+split_rectangle_y <- function(rectangle, new_value) {
+  with(rectangle, {
+    split <- choose_break(bottom, top)
+    new_bottom <- c(bottom, bottom + split)
+    new_top <- c(bottom + split, top)
+    new_value <- c(value, new_value)
+    create_rectangles(left, right, new_bottom, new_top, new_value)
+  })
+}
+
+split_rectangle <- function(rectangle, value) {
+  if(runif(1) < .5) {
+    return(split_rectangle_x(rectangle, value))
+  }
+  split_rectangle_y(rectangle, value)
+}
+
+split_block <- function(blocks, value) {
+  old <- choose_rectangle(blocks) 
+  new <- split_rectangle(blocks[old, ], value)
+  bind_rows(blocks[-old, ], new)
+}
+
+subdivision <- function(ncol = 1000, 
+                        nrow = 1000, 
+                        nsplits = 50, 
+                        seed = NULL) {
+  
+  if(!is.null(seed)) set.seed(seed)
+  blocks <- create_rectangles(
+    left = 1, 
+    right = ncol, 
+    bottom = 1, 
+    top = nrow, 
+    value = 0
+  )
+  reduce(1:nsplits, split_block, .init = blocks)
+}
+
+# fill_rectangle function splits rectangle into grid / tiles of squares length 1
+fill_rectangle <- function(left, right, bottom, top, width, 
+                           height, area, value, nshades = 100) {
+  
+  set.seed(value)
+  fractals <- list(billow, fbm, ridged)
+  generators <- list(gen_simplex, gen_perlin, gen_worley)
+  
+  expand_grid(
+    x = left:right, 
+    y = bottom:top, 
+  ) |>
+    mutate(
+      fill = 10 * value + fracture(
+        x = x * sample(-3:3, 1),
+        y = y * sample(-3:3, 1),
+        noise = sample(generators, 1)[[1]],
+        fractal = sample(fractals, 1)[[1]],
+        octaves = sample(10, 1),
+        frequency = sample(10, 1) / 20,
+        value = "distance2"
+      ) |>
+        normalise(to = c(1, nshades)) |> 
+        round()
+    )
+}
+
+# draw_mosaic function plots tiles
+draw_mosaic <- function(dat, palette) {
+  background <- sample(palette, 1)
+  dat |>
+    ggplot(aes(x, y, fill = fill)) +
+    geom_tile(show.legend = FALSE, colour = background, size = .2) +
+    scale_size_identity() +
+    scale_colour_gradientn(colours = palette) +
+    scale_fill_gradientn(colours = palette) +
+    scale_x_continuous(expand = expansion(add = 5)) +
+    scale_y_continuous(expand = expansion(add = 5)) +
+    coord_equal() +
+    theme_void() +
+    theme(plot.background = element_rect(fill = background)) 
+}
+
+mosaica <- function(ncol = 60, 
+                    nrow = 60, 
+                    nsplits = 30, 
+                    seed = NULL) {
+  
+  subdivision(ncol, nrow, nsplits, seed) |>
+    pmap_dfr(fill_rectangle) |> 
+    slice_sample(prop = .995) |>
+    filter(!is.na(fill)) |>
+    draw_mosaic(palette = sample_canva2(seed))
+}
+
+# play around with these parameters
+pic1 <- mosaica(ncol = 50, nrow = 40, nsplits = 100, seed = 90)
+plot(pic1)
+pic2 <- mosaica(ncol = 50, nrow = 40, nsplits = 10, seed = 30)
+plot(pic2)
+pic3 <- mosaica(ncol = 50, nrow = 60, nsplits = 10, seed = 28)
+plot(pic3)
+```
+
+## **Voronoi Tesselation**
+
+```{r}
+set.seed(61)
+
+dat <- tibble(
+  x = runif(20),
+  y = runif(20),
+  val = runif(20)
+)
+
+bg_dat <- tibble(
+  x = runif(500, min = -.5, max = 1.5),
+  y = runif(500, min = -.5, max = 1.5)
+)
+
+pic <- ggplot(dat, aes(x, y, fill = val)) +
+  coord_equal(xlim = c(-.3, 1.3), ylim = c(-.3, 1.3)) +
+  guides(fill = guide_none()) +
+  theme_void() + 
+  theme(panel.background = element_rect(
+    fill = "#222222", colour = "#222222"
+  ))
+
+# changed radius, color, and expand settings
+pic2 <- pic + 
+  geom_voronoi_tile(
+    data = bg_dat,
+    fill = "#333333", 
+    radius = .1,
+    expand = -.01
+  ) +
+  geom_voronoi_tile(
+    colour = "pink", 
+    max.radius = .6, 
+    radius = .02,
+    expand = -.005
+  )
+
+plot(pic2)
+```
+
+# Reflection / Summary
+
+Using code to make art is very different from using code to analyze data and all the code was new to me. The only thing that was familiar to me was how to load in packages and use functions. Because everything was new, I had a rough time understanding how to use various functions and what the code inside those functions meant. However, because I started off with zero knowledge, I learned a lot from these workshops. For example, I learned how to generate random data and color palettes, and how to modify functions to create different art pieces. I also learned how to output the art into a file and I thought the exercise on how to specify file names with the input parameters was really interesting (exercise 3).
+
+Overall, I think I understand the appeal of making art with code and how that might motivate someone to learn more about programming, like Danielle mentioned in her "Wrap Up" section. I definitely had fun experimenting with the art for task 1 and was surprised at the kinds of art that can be generated through code. The only thing I regret is that I think at my current coding proficiency, I need to put in a lot more time and work to complete these workshops so I should have reached out for help when I needed it.
